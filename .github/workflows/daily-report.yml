@@ -1,0 +1,83 @@
+name: 매일 주식 백테스트 리포트
+
+# 매일 22:30 UTC = 한국시간 다음날 07:30 에 자동 실행.
+# (미국 장 마감 후라 전일 종가가 확정된 상태 — 기존 로컬 예약 작업과 같은 시각)
+# workflow_dispatch 덕분에 GitHub 웹페이지에서 버튼으로 즉시 수동 실행도 가능.
+on:
+  schedule:
+    - cron: "30 22 * * *"
+  workflow_dispatch:
+
+# GitHub Pages 배포에 필요한 권한
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 실행이 겹치면 최신 것만 살림
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # yfinance 전체 수집 + 74종목 백테스트는 10분 안에 끝나지만 여유를 둠
+    timeout-minutes: 60
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 파이썬 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: 파이프라인 실행 (수집 → 백테스트 → 리포트 생성)
+        run: python run_daily_pipeline.py
+
+      - name: 산출물 확인
+        run: |
+          set -e
+          test -s report.html || { echo "report.html 이 비어있음"; exit 1; }
+          test -s index.html  || { echo "index.html 이 비어있음";  exit 1; }
+          python - <<'PY'
+          import json, os
+          d = json.load(open("backtest_results.json", encoding="utf-8"))
+          n = len(d["tickers"])
+          print(f"종목 {n}개 생성됨")
+          assert n >= 50, f"종목이 {n}개뿐 - 수집이 대량 실패한 것으로 보임"
+
+          # 옵션포지셔닝 레이어 상태 점검.
+          # 야후는 장 마감 정산 이후에 미결제약정(OI)을 채우기 때문에, 실행 시각이
+          # 어긋나면 "zero open interest" 로 전부 스킵될 수 있다. 치명적 오류는 아니고
+          # (종합점수가 나머지 3개 레이어로 자동 재계산됨) 리포트는 정상 생성되지만,
+          # 매일 0개가 뜬다면 cron 시각을 뒤로 미뤄야 한다는 신호다.
+          opt = json.load(open("options.json", encoding="utf-8")) if os.path.exists("options.json") else {}
+          print(f"옵션포지셔닝 수집: {len(opt)}개 종목")
+          if len(opt) == 0:
+              print("::warning::옵션 데이터가 0개입니다 - 미결제약정 미반영 시각일 수 있습니다. "
+                    "리포트는 나머지 3개 레이어로 정상 생성되지만, 반복되면 cron 시각 조정이 필요합니다.")
+          PY
+
+      - name: 배포 폴더 구성 (HTML 2개만)
+        run: |
+          mkdir -p _site
+          cp index.html report.html _site/
+
+      - name: Pages 설정
+        uses: actions/configure-pages@v5
+
+      - name: 산출물 업로드
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: GitHub Pages 배포
+        id: deployment
+        uses: actions/deploy-pages@v4
