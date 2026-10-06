@@ -5,7 +5,7 @@ name: 매일 주식 백테스트 리포트
 # workflow_dispatch 덕분에 GitHub 웹페이지에서 버튼으로 즉시 수동 실행도 가능.
 on:
   schedule:
-    - cron: "30 22 * * *"
+    - cron: "40 21 * * *"
   workflow_dispatch:
 
 # GitHub Pages 배포에 필요한 권한
