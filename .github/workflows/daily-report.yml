@@ -65,10 +65,25 @@ jobs:
                     "리포트는 나머지 3개 레이어로 정상 생성되지만, 반복되면 cron 시각 조정이 필요합니다.")
           PY
 
-      - name: 배포 폴더 구성 (HTML 2개만)
+      - name: 트렌드 레이더 생성
+        # 실패해도 기존 리포트 배포는 계속 진행
+        continue-on-error: true
+        run: python radar/build.py data radar/names.json
+
+      - name: 배포 폴더 구성 (첫 화면 = 트렌드 레이더)
         run: |
           mkdir -p _site
-          cp index.html report.html _site/
+          cp report.html _site/report.html
+          cp index.html _site/backtest.html
+          if [ -s radar/out/radar.html ]; then
+            mkdir -p _site/t
+            cp radar/out/radar.html _site/index.html
+            cp radar/out/t/*.json _site/t/
+            echo "트렌드 레이더 배포"
+          else
+            cp index.html _site/index.html
+            echo "::warning::트렌드 레이더 생성 실패 - 기존 검색 페이지를 첫 화면으로 배포"
+          fi
 
       - name: Pages 설정
         uses: actions/configure-pages@v5
