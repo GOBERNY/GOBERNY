@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: 터미널형 2열 — 왼쪽 차트·시나리오·로그, 오른쪽 지표견식 대시보드 패널. 좁으면 1열. */
+/* Layout: 터미널형 2열 — 왼쪽 차트·시나리오·로그, 오른쪽 대시보드 패널. 좁으면 1열. */
 :root{
   --bg:#eef1f5; --panel:#ffffff; --sunk:#f6f8fa; --ink:#141c27; --muted:#5b6878; --faint:#8a96a5; --line:#d9dfe7;
   --accent:#2c56cf; --accent-soft:#e3eafb;
@@ -111,7 +111,7 @@ body[data-mode="pro"] .e-only{display:none!important}
 .mode{appearance:none;border:0;background:transparent;color:var(--muted);font:600 13px var(--sans);padding:7px 14px;border-radius:999px;cursor:pointer}
 .mode[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .mode:focus-visible,.lcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-/* 신호등 카드 */
+/* 판정 카드 */
 .scr{display:flex;flex-direction:column}
 .scr-top{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
 .fchips{display:flex;flex-wrap:wrap;gap:6px}
@@ -181,7 +181,7 @@ table.scr-t{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="brand">고버니 트레이딩 센터 · 지표견 시스템 재현</div>
+      <div class="brand">고버니 트레이딩 센터 · 자체 추세 분석 시스템</div>
       <h1>고버니 트렌드 레이더</h1>
       <div class="sub" id="asof"></div>
     </div>
@@ -193,14 +193,14 @@ table.scr-t{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
     </div>
   </header>
 
-  <section class="card scr" aria-label="전체 종목 신호등">
+  <section class="card scr" aria-label="전체 종목 레이더 판정">
     <div class="scr-top"><div class="fchips" id="fchips"></div>
       <div class="scr-ctl"><input class="srch" id="srch" type="search" placeholder="종목 찾기 (예: MU, 삼성)" aria-label="종목 찾기">
-      <select class="sortsel" id="sortsel" aria-label="정렬"><option value="light">신호등 순</option><option value="gap">매수 검토가에 가까운 순</option><option value="chg">오늘 등락 순</option><option value="sym">종목명 순</option></select></div></div>
+      <select class="sortsel" id="sortsel" aria-label="정렬"><option value="light">레이더 판정 순</option><option value="gap">매수 검토가에 가까운 순</option><option value="chg">오늘 등락 순</option><option value="sym">종목명 순</option></select></div></div>
     <div class="today-line" id="todayline"></div>
     <div class="scr-wrap tbl-wrap"><table class="scr-t"><thead id="scrh"></thead><tbody id="scrb"></tbody></table></div>
   </section>
-  <div class="howto e-only"><span><span class="n">1</span><span><b>신호등 색</b>을 먼저 봅니다</span></span><span><span class="n">2</span><span><b>체크 3개</b>가 모두 ‘예’일 때만 매수를 생각합니다</span></span><span><span class="n">3</span><span><b>계획의 가격</b>에 알림을 걸어 두고 기다립니다</span></span></div>
+  <div class="howto e-only"><span><span class="n">1</span><span><b>레이더 판정</b>을 먼저 봅니다</span></span><span><span class="n">2</span><span><b>체크 3개</b>가 모두 ‘예’일 때만 매수를 생각합니다</span></span><span><span class="n">3</span><span><b>계획의 가격</b>에 알림을 걸어 두고 기다립니다</span></span></div>
   <div class="dhead" id="dhead"></div>
   <section class="strip x-only" id="strip" aria-label="요약"></section>
 
@@ -256,8 +256,8 @@ table.scr-t{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
   </div>
 
   <section class="card x-only" aria-label="규칙 사전">
-    <div class="card-h"><h2>규칙 사전</h2><span class="sub">지표견 라벨을 어떤 규칙으로 재현했는지</span></div>
-    <div class="tbl-wrap"><table class="log"><thead><tr><th>라벨</th><th>재현 규칙 (일봉)</th></tr></thead><tbody id="rules"></tbody></table></div>
+    <div class="card-h"><h2>규칙 사전</h2><span class="sub">각 라벨이 어떤 규칙으로 계산되는지</span></div>
+    <div class="tbl-wrap"><table class="log"><thead><tr><th>라벨</th><th>계산 규칙 (일봉)</th></tr></thead><tbody id="rules"></tbody></table></div>
   </section>
 
   <footer id="foot"></footer>
@@ -273,7 +273,7 @@ const CATS = [
   ['peg','PEG',true,'--up'],['pattern','패턴 돌파·이탈',true,'--vio'],['warn','과열·Trim',true,'--vio'],['squeeze','응축 해제',false,'--warn'],
   ['pb','PBB / PBS',false,'--ma14'],['mr','MR Long / Short',false,'--accent'],['nh','52주 신고가',false,'--faint'],['minor','8선 이탈·회복',false,'--faint']
 ];
-const OVL = [['dots','응축 점(드래곤볼)',true],['ma','이평선',true],['band','시그마 밴드',true],['pat','추세선·채널',true],['zz','지그재그',false],['lv','지지·저항 레벨',true],['scen','시나리오 경로',true],['vol','거래량',true]];
+const OVL = [['dots','응축 점',true],['ma','이평선',true],['band','시그마 밴드',true],['pat','추세선·채널',true],['zz','지그재그',false],['lv','지지·저항 레벨',true],['scen','시나리오 경로',true],['vol','거래량',true]];
 const LABEL = {bo:'돌파 진입',reclaim:'21일선 회복 매수',srflip:'SR flip',bofail:'돌파 청산',tp1:'TP1 · 1차 분할청산',tp2:'TP2',pyr:'피라미딩',trim:'부분익절 고려',x8:'8선 이탈',r8:'8선 회복',x14:'분할청산 · 14선',x21:'분할청산 · 21선',final:'최종 청산',pullsurge:'급등 후 풀백',hot:'과열 경고',peg:'PEG',peginv:'PEG 무효',pegrt:'PEG 되돌림 매수',pegrb:'PEG 재돌파',mbuy:'모멘텀 BUY',msell:'모멘텀 SELL',mend:'하락 모멘텀 종료',pbb:'PBB',pbs:'PBS',mrl:'MR Long',mrs:'MR Short',nh:'NH (52주 신고가)',patup:'패턴 상방 돌파',patdn:'패턴 하방 이탈',w:'W 돌파',m:'M 이탈',vcp:'VCP 형성',setup:'셋업 형성 중',sqfire:'응축 해제'};
 const RULES = [
   ['응축 점 / 응축 해제','볼린저밴드(20, 2σ)가 켈트너채널(20, 1.5×ATR) 안에 들어간 봉에 주황 점. 6봉 중 5봉 이상 응축 뒤 처음 풀린 봉이 응축 해제이고, 방향은 MACD 히스토그램 부호.'],
@@ -397,7 +397,7 @@ function renderStats(){
 
 function renderRules(){
   document.getElementById('rules').innerHTML = RULES.map(r=>`<tr><td style="white-space:nowrap"><b>${r[0]}</b></td><td>${r[1]}</td></tr>`).join('');
-  document.getElementById('foot').innerHTML = `데이터: Yahoo Finance 일봉 종가(최근 약 1년 반). 지표견(@lazyalphaio) 공개 게시글과 차트 라벨을 바탕으로 규칙을 역추적해 재현한 것으로, 레이지알파의 실제 계산식과 다를 수 있습니다. 투자 판단 참고용 정보이며 매매 권유가 아닙니다.`;
+  document.getElementById('foot').innerHTML = `데이터: Yahoo Finance 일봉 종가(최근 약 1년 반). 고버니 트레이딩 센터가 자체 설계한 추세·모멘텀 규칙으로 계산했습니다. 투자 판단 참고용 정보이며 매매 권유가 아닙니다.`;
 }
 
 function renderToolbars(){
@@ -438,7 +438,7 @@ function renderLights(){
   rows.sort((a,b)=> flt.sort==='gap' ? gapv(a)-gapv(b) : flt.sort==='chg' ? b.chg-a.chg : flt.sort==='sym' ? a.sym.localeCompare(b.sym) : (LORDER[a.light]-LORDER[b.light]) || (b.today.length-a.today.length) || gapv(a)-gapv(b));
   const easyM = st.mode==='easy';
   document.getElementById('scrh').innerHTML = easyM
-    ? '<tr><th>종목</th><th class="r">현재가</th><th class="r">등락</th><th>신호등</th><th>오늘 신호</th><th class="r">다음 가격</th><th>한 줄 이유</th></tr>'
+    ? '<tr><th>종목</th><th class="r">현재가</th><th class="r">등락</th><th>레이더 판정</th><th>오늘 신호</th><th class="r">다음 가격</th><th>한 줄 이유</th></tr>'
     : '<tr><th>종목</th><th class="r">현재가</th><th class="r">등락</th><th>상태</th><th>추세</th><th>확신</th><th class="r">조건</th><th class="r">RS</th><th class="r">10일 위/아래</th><th>최근 신호</th></tr>';
   const nameCell=s=>`<td><span class="sym">${s.sym}</span>${s.name?`<span class="nm">${s.name}</span>`:''}</td>`;
   const nextCell=s=> s.plan.kind==='hold' ? `<td class="r num">손절 ${fmtP(s.plan.stop,s.dp)}</td>` : `<td class="r num">${fmtP(s.plan.entry,s.dp)}<br><span class="sub">${pct(s.plan.gap)}</span></td>`;

@@ -1,4 +1,4 @@
-"""고버니 트렌드 엔진 — 지표견(Lazy Alpha) 스타일 신호를 일봉 데이터로 재현."""
+"""고버니 트렌드 엔진 — 일봉 데이터 기반 자체 추세·모멘텀 신호."""
 import json, math
 import numpy as np, pandas as pd
 
@@ -110,7 +110,7 @@ def run(sym, df, bench=None):
             up = df['hist'].iat[i] > 0
             add(i, 'sqfire', '응축 해제 ↑' if up else '응축 해제 ↓', 'squeeze',
                 'belowBar' if up else 'aboveBar', AMBER,
-                '볼린저밴드가 켈트너채널 안에 갇혀 있던 응축 구간(드래곤볼)이 끝나고 변동성이 터지는 첫 봉입니다. 방향은 MACD 히스토그램 부호로 판정합니다.')
+                '볼린저밴드가 켈트너채널 안에 갇혀 있던 응축 구간이 끝나고 변동성이 터지는 첫 봉입니다. 방향은 MACD 히스토그램 부호로 판정합니다.')
         # --- resistance level: highest confirmed pivot high in last 45 bars
         # 막혀 있던 고점 = 가장 최근에 확정된 피벗 고점 (60봉 이내)
         level = H[hc[-1]] if hc and hc[-1] >= i - 60 else None
